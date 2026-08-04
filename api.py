@@ -3,9 +3,16 @@ from pydantic import BaseModel
 import pandas as pd
 import joblib
 from pool_service import create_pool
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="CarboHub AI API")
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For hackathon only
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # ======================================================
 # Load Models
 # ======================================================
@@ -87,9 +94,9 @@ def verify_farmer(farmer: Farmer):
     if farmer.rainfall >= 800:
         reasons.append("Adequate Rainfall")
 
-    if confidence >= 90:
+    if confidence >= 95 and farmer.ndvi >= 0.75 and farmer.documents == 1 and farmer.gps == 1:
         risk = "Low"
-    elif confidence >= 70:
+    elif confidence >= 80:
         risk = "Medium"
     else:
         risk = "High"

@@ -6,23 +6,33 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, r2_score
 
-# Load dataset
+# =====================================================
+# Load Dataset
+# =====================================================
+
 df = pd.read_csv("dataset/carbon_dataset.csv")
 
-# Encode text columns
+# =====================================================
+# Encode Categorical Columns
+# =====================================================
+
 crop_encoder = LabelEncoder()
 soil_encoder = LabelEncoder()
 
 df["Crop"] = crop_encoder.fit_transform(df["Crop"])
 df["Soil"] = soil_encoder.fit_transform(df["Soil"])
 
-# Features
-X = df.drop("Carbon", axis=1)
+# =====================================================
+# Features & Target
+# =====================================================
 
-# Target
+X = df.drop("Carbon", axis=1)
 y = df["Carbon"]
 
-# Split dataset
+# =====================================================
+# Train Test Split
+# =====================================================
+
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -30,27 +40,54 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
-# Train model
+# =====================================================
+# Train Model
+# =====================================================
+
 model = RandomForestRegressor(
-    n_estimators=100,
-    random_state=42
+    n_estimators=50,      # Smaller model
+    random_state=42,
+    n_jobs=-1             # Faster training
 )
 
 model.fit(X_train, y_train)
 
-# Predict
+# =====================================================
+# Evaluation
+# =====================================================
+
 predictions = model.predict(X_test)
 
-# Evaluate
 mae = mean_absolute_error(y_test, predictions)
 r2 = r2_score(y_test, predictions)
 
-print(f"MAE: {mae:.2f}")
-print(f"R2 Score: {r2:.2f}")
+print("=" * 50)
+print("Carbon Model Training Complete")
+print("=" * 50)
+print(f"MAE       : {mae:.4f}")
+print(f"R2 Score  : {r2:.4f}")
+print("=" * 50)
 
-# Save model
-joblib.dump(model, "models/carbon_model.pkl")
-joblib.dump(crop_encoder, "models/carbon_crop_encoder.pkl")
-joblib.dump(soil_encoder, "models/carbon_soil_encoder.pkl")
+# =====================================================
+# Save Compressed Models
+# =====================================================
 
-print("Carbon Model Saved Successfully!")
+joblib.dump(
+    model,
+    "models/carbon_model.pkl",
+    compress=3
+)
+
+joblib.dump(
+    crop_encoder,
+    "models/carbon_crop_encoder.pkl",
+    compress=3
+)
+
+joblib.dump(
+    soil_encoder,
+    "models/carbon_soil_encoder.pkl",
+    compress=3
+)
+
+print("Compressed Carbon Model Saved Successfully!")
